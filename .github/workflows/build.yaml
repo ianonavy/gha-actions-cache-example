@@ -18,10 +18,23 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ secrets.ECR_REPO }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ secrets.ECR_REPO }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
