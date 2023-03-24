@@ -43,5 +43,4 @@ jobs:
         run: |
           docker load --input /tmp/myimage.tar
           docker images -a
-          echo ${{ steps.meta.outputs.tags }}
-          docker push ${{ steps.meta.outputs.tags }}
+          docker push ${{ secrets.ECR_REPO }} -a
