@@ -30,11 +30,17 @@ jobs:
             type=raw,value=latest
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v4
         with:
-          push: true
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=docker,dest=/tmp/myimage.tar
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Push
+        run: |
+          docker load --input /tmp/myimage.tar
+          echo ${{ steps.meta.outputs.tags }}
+          docker push ${{ secrets.ECR_REPO }}:latest
